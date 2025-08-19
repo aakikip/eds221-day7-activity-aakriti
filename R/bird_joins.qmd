@@ -1,0 +1,93 @@
+---
+title: "bird_joins"
+format: html
+editor: visual
+---
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+library(lubridate)
+```
+
+```{r}
+library(janitor)
+
+```
+
+```{r}
+bird_observations <- read_csv(here::here("data", "52_pp52_birds_1.csv"))
+```
+
+```{r}
+sites <- read_csv(here::here("data", "52_pp52_sites_1.csv"))
+```
+
+```{r}
+surveys <- read_csv(here::here("data", "52_pp52_surveys_1.csv"))
+```
+
+```{r}
+taxalist <- read_csv(here::here("data", "52_pp52_taxalist_1.csv"))
+```
+
+```{r}
+birds_subset <- bird_observations |>
+  filter(species_id %in% c("BHCO", "RWBL")) |>
+           filter(site_id %in% c("LI-W", "NU-C"))
+```
+
+```{r}
+birds_subset_left1 <- birds_subset %>% 
+  left_join(sites)
+```
+
+```{r}
+birds_left <- birds_subset %>% 
+  left_join(taxalist)
+```
+
+```{r}
+birds_full <- birds_subset %>%
+  full_join(sites)
+```
+
+```{r}
+birds <- bird_observations |>
+  rename(bird_obs_notes = notes)
+```
+
+```{r}
+birds_joined <- birds |>
+  left_join(sites) |>
+  left_join(surveys) |>
+  left_join(taxalist)
+```
+
+```{r}
+birds_joined_subset <- birds_joined |>
+  select(survey_date, common_name, park_name, bird_count)
+```
+
+```{r}
+birds_lubridate <- birds_joined_subset |>
+  mutate(survey_month = lubridate::month(survey_date)) |>
+  mutate(survey_month = as.factor(survey_month))
+
+```
+
+```{r}
+birds_lubridate_new <- birds_lubridate |>
+  dplyr::relocate(survey_month, .after = survey_date)
+```
+
+```{r}
+total_birds <- birds_lubridate_new |>
+  group_by(park_name, survey_month) |>
+  summarise(total_count = sum(bird_count)) |>
+  filter(park_name %in% c("Lindo", "Orme", "Palomino", "Sonrisa"))
+
+total_birds
+```
