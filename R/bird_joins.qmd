@@ -91,3 +91,12 @@ total_birds <- birds_lubridate_new |>
 
 total_birds
 ```
+
+```{r}
+alarm_report_update <- alarm_report %>% 
+  mutate(building = str_replace(building, pattern = "Engr", replacement = "Engineering")) %>% 
+  separate(col = building, into = c("building", "wing"), sep = "-") %>% 
+  filter(str_detect(alarm_message, pattern = "responded")) %>% 
+  separate(col = alarm_message, into = c("time", "message"), sep = "--") %>% 
+  mutate(date = lubridate::ymd(date))
+```
