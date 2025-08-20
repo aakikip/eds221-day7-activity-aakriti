@@ -4,23 +4,26 @@ format: html
 editor: visual
 ---
 
-## Quarto
-
-Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
-
-## Running Code
-
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+## 
 
 ```{r}
-1 + 1
+alarm_report <- data.frame(
+  stringsAsFactors = FALSE,
+              date = c("2020-03-14", "2020-03-15", "2020-04-10", "2020-04-18"),
+          building = c("Engineering-North",
+                       "Bren Hall","Engineering-South","Engr-North"),
+     alarm_message = c("10:02am -- HVAC system down, facilities management alerted",
+                       "8:24am -- Elevator North out of service",
+                       "12:41am -- Fire alarm, UCSB fire responded and cleared",
+                       "9:58pm -- Campus point emergency siren, UCPD responded")
+)
 ```
-
-You can add options to executable code like this
 
 ```{r}
-#| echo: false
-2 * 2
+alarm_report_update <- alarm_report %>% 
+  mutate(building = str_replace(building, pattern = "Engr", replacement = "Engineering")) %>% 
+  separate(col = building, into = c("building", "wing"), sep = "-") %>% 
+  filter(str_detect(alarm_message, pattern = "responded")) %>% 
+  separate(col = alarm_message, into = c("time", "message"), sep = "--") %>% 
+  mutate(date = lubridate::ymd(date))
 ```
-
-The `echo: false` option disables the printing of code (only output is displayed).
